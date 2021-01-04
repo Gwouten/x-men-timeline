@@ -94,6 +94,7 @@ class HTMLXMenOngoingElement extends HTMLElement {
                 h3 {
                     margin: 0 0 5px 0;
                     white-space: nowrap;
+                    transform: translateY(-100%);
                 }
                 p {
                     font-size: 0.8rem;
