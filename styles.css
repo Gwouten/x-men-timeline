@@ -1,0 +1,12 @@
+* {
+    box-sizing: border-box;
+    font-family: 'Overpass', sans-serif;
+}
+
+:root {
+    --x-yellow: #eccd0a;
+}
+
+body {
+    background-color: var(--x-yellow);
+}
