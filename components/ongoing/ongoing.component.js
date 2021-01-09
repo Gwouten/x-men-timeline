@@ -4,6 +4,8 @@ class HTMLXMenOngoingElement extends HTMLElement {
         this.attachShadow({
             mode: 'open'
         });
+
+        this._ongoingHeaderOffsetTop = 0;
     }
     
     static get observedAttributes() {
@@ -18,6 +20,7 @@ class HTMLXMenOngoingElement extends HTMLElement {
 
     connectedCallback() {
         this._render();
+        this._addIntersectionObserver();
     }
 
     get end() {
@@ -78,6 +81,31 @@ class HTMLXMenOngoingElement extends HTMLElement {
 
         return ((endYear - startYear - 1) * 12 + (12 - startMonth + 1) + endMonth) * 10;
     }
+    
+    _addIntersectionObserver() {
+        window.addEventListener('load', () => {
+            const observer = new IntersectionObserver((entries) => {
+                const ongoingHeader = this.shadowRoot.querySelector('.x-men-ongoing h3');
+                const currentEntry = entries[0];
+                // set h3 to pos:fixed until timeline bar is no longer visible
+                ongoingHeader.classList.toggle('header-fixed', currentEntry.isIntersecting);
+                console.log(currentEntry);
+                // set top for header when scrolling timeline segment out of the viewport on the left
+                ongoingHeader.style.top = 
+                    currentEntry.isIntersecting
+                    ? `${currentEntry.boundingClientRect.y + ongoingHeader.getBoundingClientRect().y}px`
+                    : '';
+
+                // if (currentEntry.isIntersecting && currentEntry.boundingClientRect.x >= 0) {
+                //     ongoingHeader.style.left = `${currentEntry.boundingClientRect.x}px`;
+                // } else {
+                //     ongoingHeader.style.left = '';
+                // }
+            });
+            const target = this.shadowRoot.querySelector('.x-men-ongoing');
+            observer.observe(target);
+        });
+    }
 
     _createStyle() {
         return `
@@ -88,18 +116,25 @@ class HTMLXMenOngoingElement extends HTMLElement {
                     color: var(--x-yellow);
                     left: calc(((12 * ${this.getYears()}) - (12 - ${this.getMonth()}) - 1) * 10px);
                     width: ${this.getSeriesRuntime()}px;
-                    padding: 10px;
-                    margin: 10px 0;
+                    padding: 5px 10px;
+                    margin: 18px 0 0 0;
                 }
                 h3 {
                     margin: 0 0 5px 0;
                     white-space: nowrap;
-                    transform: translateY(-100%);
+                    position: absolute;
+                    top: -20px;
+                    left: 0px;
+                    color: var(--x-black);
+                }
+                h3.header-fixed {
+                    position: fixed;
                 }
                 p {
                     font-size: 0.8rem;
-                    margin: 0 0 5px 0;
+                    margin: 0;
                     white-space: nowrap;
+                    line-height: 1.5;
                 }
             </style>
         `;

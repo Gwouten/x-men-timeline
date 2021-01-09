@@ -14,6 +14,8 @@ class HTMLXMenTimelineElement extends HTMLElement {
 
         this._data = null;
         this._rows = 0;
+        this._startOffsetY = 120;
+        this._ongoingLineHeight = 80;
     }
     
     connectedCallback() {
@@ -114,14 +116,14 @@ class HTMLXMenTimelineElement extends HTMLElement {
 
                 if (isColliding.includes(false)) {
                     falseIndex = isColliding.findIndex(value => value === false);
-                    ongoingTopPosition = 108 + falseIndex * 100;
+                    ongoingTopPosition = this._startOffsetY + falseIndex * this._ongoingLineHeight;
                 } else {
-                    ongoingTopPosition = 108 + isColliding.length * 100;
+                    ongoingTopPosition = this._startOffsetY + isColliding.length * this._ongoingLineHeight;
                     this._rows = isColliding.length;
                 }
                 ongoingElement.style.top = `${ongoingTopPosition}px`;
             });
-            this.shadowRoot.querySelector('.x-men-timeline').style.height = `${108 + (this._rows + 1) * 100}px`;
+            this.shadowRoot.querySelector('.x-men-timeline').style.height = `${this._startOffsetY + (this._rows + 1) * this._ongoingLineHeight}px`;
         });
     }
 
@@ -142,7 +144,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
                 }
                 x-men-ongoing {
                     position: absolute;
-                    top: 108px;
+                    top: ${this._startOffsetY}px;
                 }
             </style>
         `, 'text/html').head.firstChild;
