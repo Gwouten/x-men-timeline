@@ -21,6 +21,7 @@ class HTMLXMenOngoingElement extends HTMLElement {
     connectedCallback() {
         this._render();
         this._addIntersectionObserver();
+        this._addEventListeners();
     }
 
     get end() {
@@ -81,30 +82,41 @@ class HTMLXMenOngoingElement extends HTMLElement {
 
         return ((endYear - startYear - 1) * 12 + (12 - startMonth + 1) + endMonth) * 10;
     }
+
     
     _addIntersectionObserver() {
         window.addEventListener('load', () => {
+            const target = this.shadowRoot.querySelector('.x-men-ongoing');
+            const scrollHandler = this._onWindowScrollHandler.bind(this);
             const observer = new IntersectionObserver((entries) => {
                 const ongoingHeader = this.shadowRoot.querySelector('.x-men-ongoing h3');
                 const currentEntry = entries[0];
-                // set h3 to pos:fixed until timeline bar is no longer visible
-                ongoingHeader.classList.toggle('header-fixed', currentEntry.isIntersecting);
-                console.log(currentEntry);
-                // set top for header when scrolling timeline segment out of the viewport on the left
-                ongoingHeader.style.top = 
-                    currentEntry.isIntersecting
-                    ? `${currentEntry.boundingClientRect.y + ongoingHeader.getBoundingClientRect().y}px`
-                    : '';
 
-                // if (currentEntry.isIntersecting && currentEntry.boundingClientRect.x >= 0) {
-                //     ongoingHeader.style.left = `${currentEntry.boundingClientRect.x}px`;
-                // } else {
-                //     ongoingHeader.style.left = '';
-                // }
+                currentEntry.isIntersecting
+                    ? window.addEventListener('scroll', scrollHandler)
+                    : window.removeEventListener('scroll', scrollHandler);
             });
-            const target = this.shadowRoot.querySelector('.x-men-ongoing');
+
             observer.observe(target);
         });
+    }
+
+    _onWindowScrollHandler() {
+        const scrollCustomEvent = new CustomEvent('timeline-scroll');
+        this.shadowRoot.querySelector('.x-men-ongoing').dispatchEvent(scrollCustomEvent);
+    }
+
+    _onTimelineScrollHandler({ target }) {
+        const ongoingLeftBoundary = target.getBoundingClientRect().left;
+        const ongoingTitleWidth = target.querySelector('h3').getBoundingClientRect().width;
+        target.querySelector('h3').style.transform = 
+            target.getBoundingClientRect().left < 0 && target.getBoundingClientRect().right >= ongoingTitleWidth / 2
+            ? `translateX(${ongoingLeftBoundary * -1 + 10}px)`
+            : '';
+    }
+
+    _addEventListeners() {
+        this.shadowRoot.querySelector('.x-men-ongoing').addEventListener('timeline-scroll', this._onTimelineScrollHandler.bind(this));
     }
 
     _createStyle() {
@@ -126,9 +138,8 @@ class HTMLXMenOngoingElement extends HTMLElement {
                     top: -20px;
                     left: 0px;
                     color: var(--x-black);
-                }
-                h3.header-fixed {
-                    position: fixed;
+                    transform: translateX(0);
+                    transition: transform 1s;
                 }
                 p {
                     font-size: 0.8rem;
