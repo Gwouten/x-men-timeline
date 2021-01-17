@@ -20,7 +20,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
     
     connectedCallback() {
         this._render();
-        this._isColliding();
+        this._arrangeOngoings();
     }
 
     get data() {
@@ -85,45 +85,44 @@ class HTMLXMenTimelineElement extends HTMLElement {
         return ongoings;
     }
 
-    _isColliding() {
+    _arrangeOngoings() {
         window.addEventListener('load', () => {
-            const ongoingElements = this.shadowRoot.querySelectorAll('x-men-ongoing');
-            if (ongoingElements.length === 1 || ongoingElements.length === 0) {
-                return;
-            }
+            const allOngoings = this.shadowRoot.querySelectorAll('x-men-ongoing');
+            allOngoings.forEach((ongoing, index) => {
 
-            // Check all preceding elements in ongoingElemments for overlap
-            ongoingElements.forEach((ongoingElement, i) => {
-                if (i === 0) {
-                    return;
-                }
+                const previousOngoings = Array.from(allOngoings).slice(0, index);
+                const ongoingSegment = ongoing.shadowRoot.querySelector('.x-men-ongoing');
+                const ongoingSegmentLeft = ongoingSegment.getBoundingClientRect().left;
+                let ongoingTop = ongoing.getBoundingClientRect().top;
+                
+                const relevantOngoings = previousOngoings.filter(previousOngoing => {
+                    const previousOngoingSegment = previousOngoing.shadowRoot.querySelector('.x-men-ongoing');
+                    const previousOngoingLeft = previousOngoingSegment.getBoundingClientRect().left;
+                    const previousOngoingRight = previousOngoingSegment.getBoundingClientRect().right;
 
-                let prevOngoingRect;
-                let ongoingTopPosition;
-                let falseIndex;
-                const ongoingRect = ongoingElement.shadowRoot.querySelector('.x-men-ongoing').getBoundingClientRect();
-                const isColliding = [];
+                    return previousOngoingLeft < ongoingSegmentLeft && previousOngoingRight > ongoingSegmentLeft;
+                });
 
-                for (let j = 0; j < i; j++) {
-                    prevOngoingRect = ongoingElements[j].shadowRoot.querySelector('.x-men-ongoing').getBoundingClientRect();
-                    
-                    if (prevOngoingRect.left < ongoingRect.left && prevOngoingRect.right > ongoingRect.left) {
-                        isColliding.push(true);
-                    } else {
-                        isColliding.push(false);
-                    }                    
-                }
-
-                if (isColliding.includes(false)) {
-                    falseIndex = isColliding.findIndex(value => value === false);
-                    ongoingTopPosition = this._startOffsetY + falseIndex * this._ongoingLineHeight;
-                } else {
-                    ongoingTopPosition = this._startOffsetY + isColliding.length * this._ongoingLineHeight;
-                    this._rows = isColliding.length;
-                }
-                ongoingElement.style.top = `${ongoingTopPosition}px`;
+                relevantOngoings
+                .sort((a, b) => {
+                    if (a.getBoundingClientRect().top > b.getBoundingClientRect().top) {
+                        return 1;
+                    }
+                    if (a.getBoundingClientRect().top < b.getBoundingClientRect().top) {
+                        return -1;
+                    }
+                    return 0;
+                })
+                .forEach(relevantOngoing => {
+                    if(ongoing.seriesTitle === 'X-men Unlimited'){
+                        console.log(relevantOngoing.seriesTitle, relevantOngoing.getBoundingClientRect().top, ongoing.seriesTitle, ongoingTop);
+                    }
+                    if (relevantOngoing.getBoundingClientRect().top === ongoingTop) {
+                        ongoing.style.top = `${ongoing.offsetTop + 100}px`;
+                        ongoingTop = ongoing.getBoundingClientRect().top;
+                    }
+                });
             });
-            this.shadowRoot.querySelector('.x-men-timeline').style.height = `${this._startOffsetY + (this._rows + 1) * this._ongoingLineHeight}px`;
         });
     }
 
