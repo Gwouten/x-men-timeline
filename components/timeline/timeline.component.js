@@ -70,18 +70,29 @@ class HTMLXMenTimelineElement extends HTMLElement {
         if (!this.data) {
             return '';
         }
-
-        const ongoings = this.data.ongoings.map(ongoing => {
-            return `
-                <x-men-ongoing 
-                    start="${ongoing.start}" 
-                    end="${ongoing.end}" 
-                    series-title="${ongoing.title}" 
-                    volume="${ongoing.volume}" 
-                    issues="${ongoing.issues}">
-                </x-men-ongoing>`;
-        }).join('');
-
+        const sortedOngoings = this.data.ongoings.sort((a, b) => {
+            console.log(a.start,b.start);
+            if (Date.parse(a.start.substr(3,7) + "-" + a.start.substr(0,2) + "-01") >= Date.parse(b.start.substr(3,7) + "-" + b.start.substr(0,2) + "-01")) {
+                return 1;
+            } else {
+                return -1;
+            }
+        });
+        console.log(sortedOngoings);
+        const ongoings = 
+            sortedOngoings
+            .map(ongoing => {
+                return `
+                    <x-men-ongoing 
+                        start="${ongoing.start}" 
+                        end="${ongoing.end}" 
+                        series-title="${ongoing.title}" 
+                        volume="${ongoing.volume}" 
+                        issues="${ongoing.issues}">
+                    </x-men-ongoing>`;
+            })
+            .join('');
+        console.log(ongoings);
         return ongoings;
     }
 
@@ -100,7 +111,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
                     const previousOngoingLeft = previousOngoingSegment.getBoundingClientRect().left;
                     const previousOngoingRight = previousOngoingSegment.getBoundingClientRect().right;
 
-                    return previousOngoingLeft < ongoingSegmentLeft && previousOngoingRight > ongoingSegmentLeft;
+                    return previousOngoingLeft <= ongoingSegmentLeft && previousOngoingRight > ongoingSegmentLeft;
                 });
 
                 relevantOngoings
@@ -114,9 +125,6 @@ class HTMLXMenTimelineElement extends HTMLElement {
                     return 0;
                 })
                 .forEach(relevantOngoing => {
-                    if(ongoing.seriesTitle === 'X-men Unlimited'){
-                        console.log(relevantOngoing.seriesTitle, relevantOngoing.getBoundingClientRect().top, ongoing.seriesTitle, ongoingTop);
-                    }
                     if (relevantOngoing.getBoundingClientRect().top === ongoingTop) {
                         ongoing.style.top = `${ongoing.offsetTop + 100}px`;
                         ongoingTop = ongoing.getBoundingClientRect().top;
