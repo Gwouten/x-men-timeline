@@ -16,6 +16,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
         this._rows = 0;
         this._startOffsetY = 120;
         this._ongoingLineHeight = 80;
+        this._documentHeightFactor = 0;
     }
     
     connectedCallback() {
@@ -71,14 +72,13 @@ class HTMLXMenTimelineElement extends HTMLElement {
             return '';
         }
         const sortedOngoings = this.data.ongoings.sort((a, b) => {
-            console.log(a.start,b.start);
             if (Date.parse(a.start.substr(3,7) + "-" + a.start.substr(0,2) + "-01") >= Date.parse(b.start.substr(3,7) + "-" + b.start.substr(0,2) + "-01")) {
                 return 1;
             } else {
                 return -1;
             }
         });
-        console.log(sortedOngoings);
+
         const ongoings = 
             sortedOngoings
             .map(ongoing => {
@@ -92,7 +92,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
                     </x-men-ongoing>`;
             })
             .join('');
-        console.log(ongoings);
+
         return ongoings;
     }
 
@@ -126,10 +126,13 @@ class HTMLXMenTimelineElement extends HTMLElement {
                 })
                 .forEach(relevantOngoing => {
                     if (relevantOngoing.getBoundingClientRect().top === ongoingTop) {
-                        ongoing.style.top = `${ongoing.offsetTop + 100}px`;
+                        ongoing.style.top = `${ongoing.offsetTop + this._ongoingLineHeight}px`;
                         ongoingTop = ongoing.getBoundingClientRect().top;
                     }
                 });
+
+                this._documentHeightFactor = relevantOngoings.length > this._documentHeightFactor ? relevantOngoings.length : this._documentHeightFactor;
+                this.shadowRoot.querySelector('.x-men-timeline').style.height = `${this._documentHeightFactor * 100}px`;
             });
         });
     }
@@ -139,6 +142,10 @@ class HTMLXMenTimelineElement extends HTMLElement {
             <style>
                 #segments {
                     display: flex;
+                    position: sticky;
+                    top: 40px;
+                    background: var(--x-yellow);
+                    z-index: 1;
                 }
                 .x-men-timeline {
                     position: relative;
