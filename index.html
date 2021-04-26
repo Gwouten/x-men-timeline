@@ -17,6 +17,23 @@
     <script src="components/ongoing/ongoing.component.js"></script>
     <script src="components/timeline/timeline.component.js"></script>
     <script>
+        const shortBoxURL = 'https://api.shortboxed.com/comics/v1/new';
+        const getShortBoxData = async () => {
+            const response = await fetch(shortBoxURL, {
+                method: 'GET',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Acces-Control-Allow_origin': '*'
+                }
+            });
+            console.log(response);
+            // console.log(shortBoxData);
+            // const comicsData = await shortBoxData.json();
+            // console.log(comicsData);
+        };
+        getShortBoxData();
+
         document.querySelector('x-men-timeline').data = {
             ongoings: [
                 {
