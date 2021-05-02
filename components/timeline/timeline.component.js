@@ -12,7 +12,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
             spaceColor: 'rgba(0, 0, 0, 0)'
         }
 
-        this._data = null;
+        this._data = {};
         this._rows = 0;
         this._startOffsetY = 120;
         this._ongoingLineHeight = 80;
@@ -22,7 +22,8 @@ class HTMLXMenTimelineElement extends HTMLElement {
     }
     
     async connectedCallback() {
-        await this._getData();
+        await this._getData('ongoings');
+        await this._getData('limitedSeries');
         this._render();
     }
 
@@ -33,14 +34,26 @@ class HTMLXMenTimelineElement extends HTMLElement {
         this._data = value;
     }
 
-    async _getData() {
-        console.log('_getData');
-        const collection = await fbData.collection('ongoings').get();
-        const ongoings = await collection.docs.map(doc => {
-            return doc.data();
+    async _getData(type) {
+        const collection = await fbData.collection(type).get();
+        const result = await collection.docs.map(doc => {
+            const comicData = doc.data();
+            Object.defineProperty(comicData, 'id', {
+                value: doc.id,
+                writable: false
+            });
+            
+            return comicData;
         });
         
-        this.data = { ongoings: ongoings };
+        switch(type) {
+            case 'ongoings':
+                this.data.ongoings = result;
+                break;
+            case 'limitedSeries':
+                this.data.limitedSeries = result;
+                break;
+        }
     }
 
     _createSegments() {
@@ -95,6 +108,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
             .map(ongoing => {
                 return `
                     <x-men-ongoing 
+                        data-id="${ongoing.id}"
                         start="${ongoing.start}" 
                         end="${ongoing.end}" 
                         series-title="${ongoing.title}" 
@@ -109,7 +123,6 @@ class HTMLXMenTimelineElement extends HTMLElement {
 
     _arrangeOngoings() {
         const allOngoings = this.shadowRoot.querySelectorAll('x-men-ongoing');
-        console.log('allOngoings', allOngoings);
         allOngoings.forEach((ongoing, index) => {
 
             const previousOngoings = Array.from(allOngoings).slice(0, index);
@@ -208,6 +221,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
                 <h1>X-men Timeline</h1>
                 <div id="segments"></div>
                 ${this._createOngoings()}
+                <timeline-form></timeline-form>
             </div>
         `, 'text/html').body.firstChild;
 
@@ -215,7 +229,6 @@ class HTMLXMenTimelineElement extends HTMLElement {
     }
     
     _render() {
-        console.log('render');
         this.shadowRoot.innerHTML = '';
         this.shadowRoot.append(this._createStyle(), this._createContent());
 
