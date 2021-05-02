@@ -6,6 +6,8 @@
 :root {
     --x-yellow: #eccd0a;
     --x-black: #000;
+    --padding-medium: 12px;
+    --border-radius-circle: 1000px;
 }
 
 body {

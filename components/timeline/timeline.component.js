@@ -17,11 +17,13 @@ class HTMLXMenTimelineElement extends HTMLElement {
         this._startOffsetY = 120;
         this._ongoingLineHeight = 80;
         this._documentHeightFactor = 0;
+
+        window.addEventListener('data-loaded', this._arrangeOngoings.bind(this));
     }
     
-    connectedCallback() {
+    async connectedCallback() {
+        await this._getData();
         this._render();
-        this._arrangeOngoings();
     }
 
     get data() {
@@ -29,7 +31,16 @@ class HTMLXMenTimelineElement extends HTMLElement {
     }
     set data(value) {
         this._data = value;
-        this._render();
+    }
+
+    async _getData() {
+        console.log('_getData');
+        const collection = await fbData.collection('ongoings').get();
+        const ongoings = await collection.docs.map(doc => {
+            return doc.data();
+        });
+        
+        this.data = { ongoings: ongoings };
     }
 
     _createSegments() {
@@ -68,8 +79,8 @@ class HTMLXMenTimelineElement extends HTMLElement {
     }
 
     _createOngoings() {
-        if (!this.data) {
-            return '';
+        if (!this.data || this.data.ongoings.length === 0) {
+            return '<p class="no-data">Something went wrong, there was no data to display. Please try again later.</p>';
         }
         const sortedOngoings = this.data.ongoings.sort((a, b) => {
             if (Date.parse(a.start.substr(3,7) + "-" + a.start.substr(0,2) + "-01") >= Date.parse(b.start.substr(3,7) + "-" + b.start.substr(0,2) + "-01")) {
@@ -97,43 +108,42 @@ class HTMLXMenTimelineElement extends HTMLElement {
     }
 
     _arrangeOngoings() {
-        window.addEventListener('load', () => {
-            const allOngoings = this.shadowRoot.querySelectorAll('x-men-ongoing');
-            allOngoings.forEach((ongoing, index) => {
+        const allOngoings = this.shadowRoot.querySelectorAll('x-men-ongoing');
+        console.log('allOngoings', allOngoings);
+        allOngoings.forEach((ongoing, index) => {
 
-                const previousOngoings = Array.from(allOngoings).slice(0, index);
-                const ongoingSegment = ongoing.shadowRoot.querySelector('.x-men-ongoing');
-                const ongoingSegmentLeft = ongoingSegment.getBoundingClientRect().left;
-                let ongoingTop = ongoing.getBoundingClientRect().top;
-                
-                const relevantOngoings = previousOngoings.filter(previousOngoing => {
-                    const previousOngoingSegment = previousOngoing.shadowRoot.querySelector('.x-men-ongoing');
-                    const previousOngoingLeft = previousOngoingSegment.getBoundingClientRect().left;
-                    const previousOngoingRight = previousOngoingSegment.getBoundingClientRect().right;
+            const previousOngoings = Array.from(allOngoings).slice(0, index);
+            const ongoingSegment = ongoing.shadowRoot.querySelector('.x-men-ongoing');
+            const ongoingSegmentLeft = ongoingSegment.getBoundingClientRect().left;
+            let ongoingTop = ongoing.getBoundingClientRect().top;
+            
+            const relevantOngoings = previousOngoings.filter(previousOngoing => {
+                const previousOngoingSegment = previousOngoing.shadowRoot.querySelector('.x-men-ongoing');
+                const previousOngoingLeft = previousOngoingSegment.getBoundingClientRect().left;
+                const previousOngoingRight = previousOngoingSegment.getBoundingClientRect().right;
 
-                    return previousOngoingLeft <= ongoingSegmentLeft && previousOngoingRight > ongoingSegmentLeft;
-                });
-
-                relevantOngoings
-                .sort((a, b) => {
-                    if (a.getBoundingClientRect().top > b.getBoundingClientRect().top) {
-                        return 1;
-                    }
-                    if (a.getBoundingClientRect().top < b.getBoundingClientRect().top) {
-                        return -1;
-                    }
-                    return 0;
-                })
-                .forEach(relevantOngoing => {
-                    if (relevantOngoing.getBoundingClientRect().top === ongoingTop) {
-                        ongoing.style.top = `${ongoing.offsetTop + this._ongoingLineHeight}px`;
-                        ongoingTop = ongoing.getBoundingClientRect().top;
-                    }
-                });
-
-                this._documentHeightFactor = relevantOngoings.length > this._documentHeightFactor ? relevantOngoings.length : this._documentHeightFactor;
-                this.shadowRoot.querySelector('.x-men-timeline').style.height = `${this._documentHeightFactor * 100}px`;
+                return previousOngoingLeft <= ongoingSegmentLeft && previousOngoingRight > ongoingSegmentLeft;
             });
+
+            relevantOngoings
+            .sort((a, b) => {
+                if (a.getBoundingClientRect().top > b.getBoundingClientRect().top) {
+                    return 1;
+                }
+                if (a.getBoundingClientRect().top < b.getBoundingClientRect().top) {
+                    return -1;
+                }
+                return 0;
+            })
+            .forEach(relevantOngoing => {
+                if (relevantOngoing.getBoundingClientRect().top === ongoingTop) {
+                    ongoing.style.top = `${ongoing.offsetTop + this._ongoingLineHeight}px`;
+                    ongoingTop = ongoing.getBoundingClientRect().top;
+                }
+            });
+
+            this._documentHeightFactor = relevantOngoings.length > this._documentHeightFactor ? relevantOngoings.length : this._documentHeightFactor;
+            this.shadowRoot.querySelector('.x-men-timeline').style.height = `${this._documentHeightFactor * 100}px`;
         });
     }
 
@@ -160,6 +170,32 @@ class HTMLXMenTimelineElement extends HTMLElement {
                     position: absolute;
                     top: ${this._startOffsetY}px;
                 }
+                .no-data {
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    padding: var(--padding-medium);
+                    background-color: var(--x-yellow);
+                    border: 2px solid var(--x-black);
+                    text-align: center;
+                }
+                .no-data:before {
+                    align-items: center;
+                    background-color: var(--x-black);
+                    border-radius: var(--border-radius-circle);
+                    color: var(--x-yellow);
+                    content: '!';
+                    display: flex;
+                    font-size: 26px;
+                    height: 30px;
+                    justify-content: center;
+                    left: 0;
+                    position: absolute;
+                    top: 0;
+                    transform: translate(-50%, -50%);
+                    width: 30px;
+                }
             </style>
         `, 'text/html').head.firstChild;
 
@@ -179,6 +215,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
     }
     
     _render() {
+        console.log('render');
         this.shadowRoot.innerHTML = '';
         this.shadowRoot.append(this._createStyle(), this._createContent());
 
@@ -186,6 +223,7 @@ class HTMLXMenTimelineElement extends HTMLElement {
         Array.from(allSegments).forEach(child => {
             this.shadowRoot.querySelector('#segments').append(child);    
         });
+        window.dispatchEvent(new CustomEvent('data-loaded'));
     }
 }
 

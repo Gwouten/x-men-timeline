@@ -8,195 +8,214 @@
     <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@100;400;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./reset.css">
     <link rel="stylesheet" href="./styles.css">
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.2/firebase-app.js"></script>
+    <!--https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.4.2/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.4.1/firebase-firestore.js"></script>
 </head>
 <body>
 
     <x-men-timeline></x-men-timeline>
-    
+
+    <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyDER3b8JVVc76pteiR21Pi6_z3mJyYOnZs",
+            authDomain: "x-men-timeline.firebaseapp.com",
+            projectId: "x-men-timeline",
+            storageBucket: "x-men-timeline.appspot.com",
+            messagingSenderId: "857477515757",
+            appId: "1:857477515757:web:19f02839930b5d70a37fe4",
+            measurementId: "G-5ZKP86G405"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const fbData = firebase.firestore();
+        fbData.settings({
+            timestampsInSnapshots: true
+        });
+        firebase.analytics();
+    </script>
+
+
     <script src="components/timeline/segment.component.js"></script>
     <script src="components/ongoing/ongoing.component.js"></script>
     <script src="components/timeline/timeline.component.js"></script>
     <script>
-        const shortBoxURL = 'https://api.shortboxed.com/comics/v1/new';
-        const getShortBoxData = async () => {
-            const response = await fetch(shortBoxURL, {
-                method: 'GET',
-                mode: 'no-cors',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Acces-Control-Allow_origin': '*'
-                }
-            });
-            console.log(response);
-            // console.log(shortBoxData);
-            // const comicsData = await shortBoxData.json();
-            // console.log(comicsData);
-        };
-        getShortBoxData();
+        // list of all titles that need to be checked => possible to get list from wikipedia list page? https://en.wikipedia.org/wiki/List_of_X-Men_comics
+        const titles = [
+            'the uncanny x-men',
+            'uncanny x-men',
+            'x-men',
+            'new mutants',
+            'alpha flight',
+            'x-factor',
+            'x-force',
+            'generation x',
+            'excalibur',
+            'wolverine',
+            'cable',
+            'deadpool'
+        ];
 
-        document.querySelector('x-men-timeline').data = {
+        document.querySelector('x-men-timeline').data2 = {
             ongoings: [
-                {
-                    title: 'Uncanny X-men',
-                    start: '09/1963',
-                    end: '12/2011',
-                    volume: 1,
-                    issues: 544
-                },
-                {
-                    title: 'New Mutants',
-                    start: '03/1983',
-                    end: '04/1991',
-                    volume: 1,
-                    issues: 100
-                },
-                {
-                    title: 'Alpha Flight',
-                    start: '08/1983',
-                    end: '03/1994',
-                    volume: 1,
-                    issues: 130
-                },
-                {
-                    title: 'X-factor',
-                    start: '02/1986',
-                    end: '09/1998',
-                    volume: 1,
-                    issues: 149
-                },            
-                {
-                    title: 'Excalibur',
-                    start: '10/1988',
-                    end: '11/1998',
-                    volume: 1,
-                    issues: 125
-                },            
-                {
-                    title: 'Wolverine',
-                    start: '11/1988',
-                    end: '07/2003',
-                    volume: 2,
-                    issues: 189
-                },            
-                {
-                    title: 'X-force',
-                    start: '08/1990',
-                    end: '08/2002',
-                    volume: 1,
-                    issues: 129
-                },            
-                {
-                    title: 'X-men',
-                    start: '10/1990',
-                    end: '06/2001',
-                    volume: 1,
-                    issues: 113
-                },            
-                {
-                    title: 'Cable',
-                    start: '05/1993',
-                    end: '09/2002',
-                    volume: 1,
-                    issues: 107
-                },            
-                {
-                    title: 'X-men Unlimited',
-                    start: '06/1993',
-                    end: '09/2003',
-                    volume: 1,
-                    issues: 50
-                },
-                {
-                    title: 'Generation X',
-                    start: '11/1994',
-                    end: '06/2001',
-                    volume: 1,
-                    issues: 75
-                },
-                {
-                    title: 'Alpha Flight',
-                    start: '01/1997',
-                    end: '03/1999',
-                    volume: 2,
-                    issues: 20
-                },
-                {
-                    title: 'Deadpool',
-                    start: '01/1997',
-                    end: '09/2002',
-                    volume: 3,
-                    issues: 69
-                },
-                {
-                    title: 'Maverick',
-                    start: '09/1997',
-                    end: '08/1998',
-                    volume: 1,
-                    issues: 12
-                },
-                {
-                    title: 'Quicksilver',
-                    start: '11/1997',
-                    end: '10/1998',
-                    volume: 1,
-                    issues: 13
-                },
-                {
-                    title: 'New X-men',
-                    start: '07/2001',
-                    end: '06/2004',
-                    volume: 1,
-                    issues: 42
-                },
-                {
-                    title: 'Uncanny X-men',
-                    start: '01/2012',
-                    end: '12/2012',
-                    volume: 2,
-                    issues: 35
-                },            
-                {
-                    title: 'Uncanny X-men',
-                    start: '04/2013',
-                    end: '01/2016',
-                    volume: 3,
-                    issues: 35
-                },            
-                {
-                    title: 'Uncanny X-men',
-                    start: '03/2016',
-                    end: '05/2017',
-                    volume: 4,
-                    issues: 20
-                },            
-                {
-                    title: 'Uncanny X-men',
-                    start: '01/2019',
-                    end: '09/2019',
-                    volume: 5,
-                    issues: 35
-                },
-                {
-                    title: 'X-men Blue',
-                    start: '06/2017',
-                    end: '12/2018',
-                    volume: 1,
-                    issues: 36
-                },
-                {
-                    title: 'X-men Gold',
-                    start: '04/2017',
-                    end: '12/2018',
-                    volume: 1,
-                    issues: 36
-                },
-                {
-                    title: 'X-men Red',
-                    start: '04/2018',
-                    end: '12/2018',
-                    volume: 1,
-                    issues: 11
-                },
+        //         {
+        //             title: 'Jean Grey',
+        //             start: '07/2017',
+        //             end: '08/2018',
+        //             volume: 1,
+        //             issues: 11
+        //         },
+        //         {
+        //             title: 'Generation X',
+        //             start: '07/2017',
+        //             end: '04/2018',
+        //             volume: 2,
+        //             issues: 12
+        //         },
+        //         {
+        //             title: 'X-factor',
+        //             start: '02/1986',
+        //             end: '09/1998',
+        //             volume: 1,
+        //             issues: 149
+        //         },            
+        //         {
+        //             title: 'Excalibur',
+        //             start: '10/1988',
+        //             end: '11/1998',
+        //             volume: 1,
+        //             issues: 125
+        //         },            
+        //         {
+        //             title: 'Wolverine',
+        //             start: '11/1988',
+        //             end: '07/2003',
+        //             volume: 2,
+        //             issues: 189
+        //         },            
+        //         {
+        //             title: 'X-force',
+        //             start: '08/1990',
+        //             end: '08/2002',
+        //             volume: 1,
+        //             issues: 129
+        //         },            
+        //         {
+        //             title: 'X-men',
+        //             start: '10/1990',
+        //             end: '06/2001',
+        //             volume: 1,
+        //             issues: 113
+        //         },            
+        //         {
+        //             title: 'Cable',
+        //             start: '05/1993',
+        //             end: '09/2002',
+        //             volume: 1,
+        //             issues: 107
+        //         },            
+        //         {
+        //             title: 'X-men Unlimited',
+        //             start: '06/1993',
+        //             end: '09/2003',
+        //             volume: 1,
+        //             issues: 50
+        //         },
+        //         {
+        //             title: 'Generation X',
+        //             start: '11/1994',
+        //             end: '06/2001',
+        //             volume: 1,
+        //             issues: 75
+        //         },
+        //         {
+        //             title: 'Alpha Flight',
+        //             start: '01/1997',
+        //             end: '03/1999',
+        //             volume: 2,
+        //             issues: 20
+        //         },
+        //         {
+        //             title: 'Deadpool',
+        //             start: '01/1997',
+        //             end: '09/2002',
+        //             volume: 3,
+        //             issues: 69
+        //         },
+        //         {
+        //             title: 'Maverick',
+        //             start: '09/1997',
+        //             end: '08/1998',
+        //             volume: 1,
+        //             issues: 12
+        //         },
+        //         {
+        //             title: 'Quicksilver',
+        //             start: '11/1997',
+        //             end: '10/1998',
+        //             volume: 1,
+        //             issues: 13
+        //         },
+        //         {
+        //             title: 'New X-men',
+        //             start: '07/2001',
+        //             end: '06/2004',
+        //             volume: 1,
+        //             issues: 42
+        //         },
+        //         {
+        //             title: 'Uncanny X-men',
+        //             start: '01/2012',
+        //             end: '12/2012',
+        //             volume: 2,
+        //             issues: 35
+        //         },            
+        //         {
+        //             title: 'Uncanny X-men',
+        //             start: '04/2013',
+        //             end: '01/2016',
+        //             volume: 3,
+        //             issues: 35
+        //         },            
+        //         {
+        //             title: 'Uncanny X-men',
+        //             start: '03/2016',
+        //             end: '05/2017',
+        //             volume: 4,
+        //             issues: 20
+        //         },            
+        //         {
+        //             title: 'Uncanny X-men',
+        //             start: '01/2019',
+        //             end: '09/2019',
+        //             volume: 5,
+        //             issues: 35
+        //         },
+        //         {
+        //             title: 'X-men Blue',
+        //             start: '06/2017',
+        //             end: '12/2018',
+        //             volume: 1,
+        //             issues: 36
+        //         },
+        //         {
+        //             title: 'X-men Gold',
+        //             start: '04/2017',
+        //             end: '12/2018',
+        //             volume: 1,
+        //             issues: 36
+        //         },
+        //         {
+        //             title: 'X-men Red',
+        //             start: '04/2018',
+        //             end: '12/2018',
+        //             volume: 1,
+        //             issues: 11
+        //         },
             ],
             limitedSeries: [],
             oneShots: []

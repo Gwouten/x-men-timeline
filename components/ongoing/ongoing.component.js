@@ -6,6 +6,7 @@ class HTMLXMenOngoingElement extends HTMLElement {
         });
 
         this._ongoingHeaderOffsetTop = 0;
+        window.addEventListener('ready', this._addIntersectionObserver.bind(this));
     }
     
     static get observedAttributes() {
@@ -85,7 +86,6 @@ class HTMLXMenOngoingElement extends HTMLElement {
 
     
     _addIntersectionObserver() {
-        window.addEventListener('load', () => {
             const target = this.shadowRoot.querySelector('.x-men-ongoing');
             const scrollHandler = this._onWindowScrollHandler.bind(this);
             const observer = new IntersectionObserver((entries) => {
@@ -98,7 +98,6 @@ class HTMLXMenOngoingElement extends HTMLElement {
             });
 
             observer.observe(target);
-        });
     }
 
     _onWindowScrollHandler() {
@@ -120,13 +119,15 @@ class HTMLXMenOngoingElement extends HTMLElement {
     }
 
     _createStyle() {
-        return `
+        const style = new DOMParser().parseFromString(`
             <style>
+                :host {
+                    left: calc(((12 * ${this.getYears()}) - (12 - ${this.getMonth()}) - 1) * 10px);
+                }
                 .x-men-ongoing {
                     position: relative;
                     background-color: black;
                     color: var(--x-yellow);
-                    left: calc(((12 * ${this.getYears()}) - (12 - ${this.getMonth()}) - 1) * 10px);
                     width: ${this.getSeriesRuntime()}px;
                     padding: 5px 10px;
                     margin: 18px 0 0 0;
@@ -148,25 +149,29 @@ class HTMLXMenOngoingElement extends HTMLElement {
                     line-height: 1.5;
                 }
             </style>
-        `;
+        `, 'text/html').head.firstChild;
+        
+        return style;
     }
 
     _createContent() {
-        this.getMonth();
-        const content = `
-           <div class="x-men-ongoing">
+        // this.getMonth();
+        const content = new DOMParser().parseFromString(`
+            <div class="x-men-ongoing">
                 <h3>${this.seriesTitle} - Volume ${this.volume ? this.volume : ''}</h3>
                 <p>From ${this.start} until ${this.end}</p>
                 <p>${this.issues} issues</p>
             </div>
-        `
+        `, 'text/html').body.firstChild;
+
         return content;
     }
 
     _render() {
         this.shadowRoot.innerHTML = '';
-        this.shadowRoot.innerHTML += this._createStyle();
-        this.shadowRoot.innerHTML += this._createContent();
+        this.shadowRoot.append(this._createStyle(), this._createContent());
+
+        window.dispatchEvent(new CustomEvent('ready'));
     }
 }
 
