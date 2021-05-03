@@ -16,6 +16,7 @@
 </head>
 <body>
 
+    <timeline-header></timeline-header>
     <x-men-timeline></x-men-timeline>
 
     <script>
@@ -45,6 +46,17 @@
     <script src="components/limited/limited.component.js"></script>
     <script src="components/timeline/timeline.component.js"></script>
     <script src="components/form/form.component.js"></script>
+    <script src="components/header/header.component.js"></script>
+    <script>
+        const getShortboxedData = async () => {
+            const shortboxedData = await fetch('https://api.shortboxed.com/comics/v1/new', {
+                method: 'GET'
+            });
+            console.log(shortboxedData.json());
+        };
+
+        getShortboxedData();
+    </script>
     <script>
         // list of all titles that need to be checked => possible to get list from wikipedia list page? https://en.wikipedia.org/wiki/List_of_X-Men_comics
         const titles = [
@@ -62,8 +74,6 @@
             'deadpool'
         ];
 
-        document.querySelector('x-men-timeline').data2 = {
-            ongoings: [
         //         {
         //             title: 'Generation X',
         //             start: '07/2017',
@@ -211,10 +221,6 @@
         //             volume: 1,
         //             issues: 11
         //         },
-            ],
-            limitedSeries: [],
-            oneShots: []
-        }
     </script>
 </body>
 </html>

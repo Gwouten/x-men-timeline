@@ -59,22 +59,6 @@ class TimelineForm extends HTMLElement {
                     width: 100vw;
                     color: var(--x-yellow);
                 }
-                form {
-                    display: flex;
-                    flex-wrap: wrap;
-                }
-                h2, button {
-                    width: 100%;
-                }
-                button {
-                    padding: var(--padding-medium) 0;
-                    margin: var(--padding-medium) 0;
-                }
-                .input-group {
-                    display: flex;
-                    flex-direction: column;
-                        width: 300px;
-                }
             </style>
         `, 'text/html').head.firstChild;
         

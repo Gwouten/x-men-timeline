@@ -218,7 +218,6 @@ class HTMLXMenTimelineElement extends HTMLElement {
     _createContent() {
         const content = new DOMParser().parseFromString(`
            <div class="x-men-timeline">
-                <h1>X-men Timeline</h1>
                 <div id="segments"></div>
                 ${this._createOngoings()}
                 <timeline-form></timeline-form>
